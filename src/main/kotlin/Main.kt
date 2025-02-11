@@ -1,18 +1,20 @@
 package com
 
 import com.exception.RateLimitExceededException
-import com.model.RateLimitRule
 import com.service.Gateway
 import com.service.NotificationService
-import java.time.Duration
 import java.time.Instant
+import com.config.AppConfig
+import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.boot.runApplication
+import org.springframework.boot.autoconfigure.SpringBootApplication
 
-fun main() {
-    val rules = mapOf(
-        "status" to RateLimitRule(2, Duration.ofMinutes(1)),
-        "news" to RateLimitRule(1, Duration.ofDays(1)),
-        "marketing" to RateLimitRule(3, Duration.ofHours(1))
-    )
+@SpringBootApplication
+@EnableConfigurationProperties(AppConfig::class)
+class NotificationApplication
+
+fun main(args: Array<String>) {
+    val context = runApplication<NotificationApplication>(*args)
 
     val gateway = object : Gateway {
         override fun send(userId: String, message: String) {
@@ -20,7 +22,8 @@ fun main() {
         }
     }
 
-    val service = NotificationService(gateway, rules)
+    val config = context.getBean(AppConfig::class.java)
+    val service = NotificationService(gateway, config.toRateLimitRules())
 
     repeat(4) { i ->
         try {

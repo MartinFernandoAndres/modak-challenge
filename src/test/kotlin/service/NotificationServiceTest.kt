@@ -161,14 +161,14 @@ class NotificationServiceTest {
 
         assertEquals(10, realGateway.sentMessages.size)
 
-        // Verificar límites
+        // check límites
         assertThrows<RateLimitExceededException> {
             service.send("alert", "user1", "extra alert")
         }
         assertThrows<RateLimitExceededException> {
             service.send("update", "user1", "extra update")
         }
-        // Verificar user2 sigue permitido
+        // check user2 allowed
         service.send("alert", "user2", "alert 1")
         service.send("update", "user2", "update 1")
     }
